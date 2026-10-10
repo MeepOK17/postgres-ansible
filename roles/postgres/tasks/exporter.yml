@@ -1,0 +1,67 @@
+- name: Create exporter db user
+  community.postgresql.postgresql_user:
+    name: "{{ postgres__exporter_user }}"
+    password: "{{ postgres__exporter_password }}"
+  become_user: postgres
+  no_log: true
+
+- name: Grant pg_monitor to exporter
+  community.postgresql.postgresql_membership:
+    groups: pg_monitor
+    target_roles: "{{ postgres__exporter_user }}"
+  become_user: postgres
+
+- name: Create exporter system user
+  ansible.builtin.user:
+    name: "{{ postgres__exporter_user }}"
+    system: true
+    shell: /usr/sbin/nologin
+    create_home: false
+
+- name: Download exporter
+  ansible.builtin.get_url:
+    url: "{{ __exporter_url }}"
+    dest: "/tmp/{{ __exporter_name }}.tar.gz"
+  delegate_to: localhost
+  become: false
+
+- name: Unpack exporter
+  ansible.builtin.unarchive:
+    src: "/tmp/{{ __exporter_name }}.tar.gz"
+    dest: /tmp
+    remote_src: true
+    creates: "/tmp/{{ __exporter_name }}/postgres_exporter"
+  delegate_to: localhost
+  become: false
+
+- name: Copy exporter binary
+  ansible.builtin.copy:
+    src: "/tmp/{{ __exporter_name }}/postgres_exporter"
+    dest: /usr/local/bin/postgres_exporter
+    mode: "0755"
+  notify: restart exporter
+
+- name: Exporter env file
+  ansible.builtin.template:
+    src: postgres-exporter.env.j2
+    dest: /etc/default/postgres-exporter
+    mode: "0600"
+  notify: restart exporter
+
+- name: Exporter unit file
+  ansible.builtin.template:
+    src: postgres-exporter.service.j2
+    dest: /etc/systemd/system/postgres-exporter.service
+    mode: "0644"
+  notify:
+    - daemon reload
+    - restart exporter
+
+- name: Run handlers again
+  ansible.builtin.meta: flush_handlers
+
+- name: Start exporter
+  ansible.builtin.systemd:
+    name: postgres-exporter
+    state: started
+    enabled: true

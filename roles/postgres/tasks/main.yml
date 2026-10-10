@@ -1,0 +1,11 @@
+- name: Configure PostgreSQL
+  become: true
+  block:
+    - name: Install PostgreSQL
+      ansible.builtin.import_tasks: install.yml
+
+    - name: Create users and databases
+      ansible.builtin.import_tasks: databases.yml
+
+    - name: Install exporter
+      ansible.builtin.import_tasks: exporter.yml

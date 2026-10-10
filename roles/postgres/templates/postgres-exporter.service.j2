@@ -1,0 +1,12 @@
+[Unit]
+Description=Postgres exporter
+After=network.target postgres.service
+
+[Service]
+User={{ postgres__exporter_user }}
+EnvironmentFile=/etc/default/postgres-exporter
+ExecStart=/usr/local/bin/postgres_exporter --web.listen-address=:{{ postgres__exporter_port }}
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
