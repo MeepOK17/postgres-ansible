@@ -1,0 +1,17 @@
+---
+postgres__opts:
+  listen_addresses: "'localhost'"
+  port: 5432
+  max_connections: 50
+  shared_buffers: "'256MB'"
+
+postgres__users:
+  - name: app_user
+    password: "{{ vault_app_password }}"
+
+postgres__databases:
+  - name: app_db
+    owner: app_user
+  - name: test_db
+
+postgres__exporter_password: "{{ vault_exporter_password }}"

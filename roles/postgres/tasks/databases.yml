@@ -1,0 +1,15 @@
+- name: Create users
+  community.postgresql.postgresql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.password }}"
+  loop: "{{ postgres__users }}"
+  loop_control:
+    label: "{{ item.name }}"
+  become_user: postgres
+
+- name: Create databases
+  community.postgresql.postgresql_db:
+    name: "{{ item.name }}"
+    owner: "{{ item.owner | default('postgres') }}"
+  loop: "{{ postgres__databases }}"
+  become_user: postgres
