@@ -1,0 +1,4 @@
+# managed by ansible
+{% for r in postgres__hba %}
+{{ r.type }}  {{ r.database }}  {{ r.user }}  {{ r.address | default('') }}  {{ r.method }}
+{% endfor %}

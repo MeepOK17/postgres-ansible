@@ -1,0 +1,5 @@
+---
+__pg_version: "16"
+__pg_bin: "/usr/lib/postgresql/{{ __pg_version }}/bin"
+__exporter_name: "postgres_exporter-{{ postgres__exporter_version }}.linux-amd64"
+__exporter_url: "https://github.com/prometheus-community/postgres_exporter/releases/download/v{{ postgres__exporter_version }}/{{ __exporter_name }}.tar.gz"
